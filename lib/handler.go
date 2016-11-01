@@ -100,7 +100,7 @@ func HandleExport(w http.ResponseWriter, r *http.Request) {
 		export[index] = v
 		index++
 	}
-	resp, err := json.Marshal(export)
+	resp, err := json.MarshalIndent(export, "", "  ")
 	if err != nil {
 		logError(err)
 		ret := mockResponse{Code: 500, Message: err.Error()}
