@@ -25,7 +25,7 @@ func HandleMock(w http.ResponseWriter, r *http.Request) {
 	Logger.Info("got request", zap.String("url", r.URL.RequestURI()), zap.String("method", r.Method))
 
 	id := genID(r.URL.Path, r.Method)
-	rule := defaultPool.Get(id)
+	rule := defaultPool.get(id)
 	if rule == nil {
 		rule = defaultRule
 	}
@@ -82,7 +82,7 @@ func HandleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defaultPool.Receive(rule)
+	defaultPool.receive(rule)
 	w.Header().Set("Content-Type", "application/json")
 	resp, _ := json.Marshal(success)
 	io.WriteString(w, string(resp))
@@ -93,7 +93,26 @@ func HandleExport(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		return
 	}
-	defaultPool.handleExport(w, r)
+
+	export := make([]*MockRule, len(defaultPool.pool))
+	index := 0
+	for _, v := range defaultPool.pool {
+		export[index] = v
+		index++
+	}
+	resp, err := json.Marshal(export)
+	if err != nil {
+		logError(err)
+		ret := mockResponse{Code: 500, Message: err.Error()}
+		errResp, _ := json.Marshal(ret)
+
+		w.Header().Set("Content-Type", "application/json")
+		io.WriteString(w, string(errResp))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, string(resp))
 }
 
 // HandleImport to import local settings
@@ -101,4 +120,24 @@ func HandleImport(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		return
 	}
+
+	rules := &[]*MockRule{}
+	defer r.Body.Close()
+	err := json.NewDecoder(r.Body).Decode(rules)
+	if err != nil {
+		logError(err)
+		ret := mockResponse{Code: 400, Message: err.Error()}
+		errResp, _ := json.Marshal(ret)
+
+		w.Header().Set("Content-Type", "application/json")
+		io.WriteString(w, string(errResp))
+		return
+	}
+
+	defaultPool.reset()
+	defaultPool.batchReceive(*rules...)
+
+	w.Header().Set("Content-Type", "application/json")
+	resp, _ := json.Marshal(success)
+	io.WriteString(w, string(resp))
 }

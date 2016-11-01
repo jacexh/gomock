@@ -1,10 +1,7 @@
 package gomock
 
 import (
-	"encoding/json"
 	"errors"
-	"io"
-	"net/http"
 	"strings"
 )
 
@@ -55,8 +52,7 @@ func (r *MockRule) filte() error {
 	return nil
 }
 
-// Get get mock rule from rule pool by id
-func (p *MockRulePool) Get(id string) *MockRule {
+func (p *MockRulePool) get(id string) *MockRule {
 	rule, ok := p.pool[id]
 	if ok {
 		return rule
@@ -64,29 +60,16 @@ func (p *MockRulePool) Get(id string) *MockRule {
 	return nil
 }
 
-// Receive insert MockRule to MockRulePool
-func (p *MockRulePool) Receive(r *MockRule) {
+func (p *MockRulePool) receive(r *MockRule) {
 	p.pool[r.id()] = r
 }
 
-func (p *MockRulePool) handleExport(w http.ResponseWriter, r *http.Request) {
-	export := make([]*MockRule, len(p.pool))
-	index := 0
-	for _, v := range p.pool {
-		export[index] = v
-		index++
-	}
-	resp, err := json.Marshal(export)
-	if err != nil {
-		logError(err)
-		ret := mockResponse{Code: 500, Message: err.Error()}
-		errResp, _ := json.Marshal(ret)
+func (p *MockRulePool) reset() {
+	p.pool = map[string]*MockRule{}
+}
 
-		w.Header().Set("Content-Type", "application/json")
-		io.WriteString(w, string(errResp))
-		return
+func (p *MockRulePool) batchReceive(rules ...*MockRule) {
+	for _, r := range rules {
+		p.receive(r)
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	io.WriteString(w, string(resp))
 }
