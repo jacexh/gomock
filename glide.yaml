@@ -1,0 +1,3 @@
+package: github.com/jacexh/gomock
+import:
+- package: github.com/uber-go/zap
