@@ -22,7 +22,8 @@ var (
 
 // HandleMock for mocked api
 func HandleMock(w http.ResponseWriter, r *http.Request) {
-	Logger.Info("got request", zap.String("url", r.URL.RequestURI()))
+	Logger.Info("got request", zap.String("url", r.URL.RequestURI()), zap.String("method", r.Method))
+
 	id := genID(r.URL.Path, r.Method)
 	rule := defaultPool.Get(id)
 	if rule == nil {
@@ -52,7 +53,6 @@ func HandleMock(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-
 }
 
 // HandleCreate for create mock rule

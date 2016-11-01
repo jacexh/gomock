@@ -36,15 +36,17 @@ func (t *Template) IsMatched(r *http.Request) bool {
 
 // ToResponse render the template to http response
 func (t *Template) ToResponse(w http.ResponseWriter) {
-	if t.StatusCode != 0 {
-		w.WriteHeader(t.StatusCode)
-	}
 	if t.ContentType != "" {
 		w.Header().Set("Content-Type", t.ContentType)
 	}
 	for k, v := range t.Headers {
 		w.Header().Set(k, v)
 	}
+
+	if t.StatusCode != 0 {
+		w.WriteHeader(t.StatusCode)
+	}
+
 	io.WriteString(w, t.Content)
 }
 

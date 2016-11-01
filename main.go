@@ -7,10 +7,10 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", gomock.HandleMock)
 	http.HandleFunc("/create", gomock.HandleCreate)
 	http.HandleFunc("/import", gomock.HandleImport)
 	http.HandleFunc("/export", gomock.HandleExport)
+	http.HandleFunc("/", gomock.HandleMock)
 
 	http.ListenAndServe(":8080", nil)
 }

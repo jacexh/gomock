@@ -21,9 +21,9 @@ func init() {
 		Mode:   ModeNormal,
 		Templates: []*Template{
 			&Template{
-				Content:     "Welcome to gomock",
+				Content:     `{"server": "gomock"}`,
 				StatusCode:  200,
-				ContentType: "text/html",
+				ContentType: "application/json",
 			},
 		},
 	}
