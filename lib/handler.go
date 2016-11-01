@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+
+	"github.com/uber-go/zap"
 )
 
 type (
@@ -20,6 +22,36 @@ var (
 
 // HandleMock for mocked api
 func HandleMock(w http.ResponseWriter, r *http.Request) {
+	Logger.Info("got request", zap.String("url", r.URL.RequestURI()))
+	id := genID(r.URL.Path, r.Method)
+	rule := defaultPool.Get(id)
+	if rule == nil {
+		rule = defaultRule
+	}
+
+	switch rule.Mode {
+	case ModeNormal:
+		for _, t := range rule.Templates {
+			if t.IsMatched(r) {
+				t.ToResponse(w)
+				return
+			}
+		}
+	case ModeKeyword:
+		for _, t := range rule.Templates {
+			if t.IsMatchedByKeyword(r) {
+				t.ToResponse(w)
+				return
+			}
+		}
+	case ModeRegular:
+		for _, t := range rule.Templates {
+			if t.IsMatchedByRegular(r) {
+				t.ToResponse(w)
+				return
+			}
+		}
+	}
 
 }
 

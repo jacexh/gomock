@@ -24,11 +24,11 @@ type (
 
 var (
 	defaultPool MockRulePool
-	defaultRule MockRule
+	defaultRule *MockRule
 )
 
 func (r *MockRule) id() string {
-	return r.Path + "||" + r.Method
+	return genID(r.Path, r.Method)
 }
 
 func (r *MockRule) filte() error {

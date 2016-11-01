@@ -3,6 +3,8 @@ package gomock
 import (
 	"runtime"
 
+	"strings"
+
 	"github.com/uber-go/zap"
 )
 
@@ -13,7 +15,7 @@ func init() {
 	Logger = zap.New(zap.NewJSONEncoder(zap.RFC3339Formatter("time"))).With(zap.String("package", "gomock"))
 
 	defaultPool = MockRulePool{pool: map[string]*MockRule{}}
-	defaultRule = MockRule{
+	defaultRule = &MockRule{
 		Path:   "/",
 		Method: "GET",
 		Mode:   ModeNormal,
@@ -34,4 +36,8 @@ func logError(e error) {
 			zap.String("func", runtime.FuncForPC(pc).Name()),
 			zap.Int("line", line))
 	}
+}
+
+func genID(path, method string) string {
+	return path + "||" + strings.ToUpper(method)
 }
