@@ -15,7 +15,7 @@ type (
 
 var (
 	parseRuleFail = mockResponse{Code: 400, Message: "parse mock rule fail"}
-	success       = mockResponse{Code: 20, Message: "success"}
+	success       = mockResponse{Code: 200, Message: "success"}
 )
 
 // HandleMock for mocked api
@@ -39,8 +39,18 @@ func HandleCreate(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, string(resp))
 		return
 	}
-	Logger.Info("success")
 
+	err = rule.filte()
+	if err != nil {
+		logError(err)
+		ret := mockResponse{Code: 400, Message: err.Error()}
+		resp, _ := json.Marshal(ret)
+		w.Header().Set("Content-Type", "application/json")
+		io.WriteString(w, string(resp))
+		return
+	}
+
+	defaultPool.Receive(rule)
 	w.Header().Set("Content-Type", "application/json")
 	resp, _ := json.Marshal(success)
 	io.WriteString(w, string(resp))
@@ -48,10 +58,15 @@ func HandleCreate(w http.ResponseWriter, r *http.Request) {
 
 // HandleExport to export current mock rules
 func HandleExport(w http.ResponseWriter, r *http.Request) {
-
+	if r.Method != http.MethodGet {
+		return
+	}
+	defaultPool.handleExport(w, r)
 }
 
 // HandleImport to import local settings
 func HandleImport(w http.ResponseWriter, r *http.Request) {
-
+	if r.Method != http.MethodPost {
+		return
+	}
 }

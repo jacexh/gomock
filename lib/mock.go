@@ -11,6 +11,20 @@ var Logger zap.Logger
 
 func init() {
 	Logger = zap.New(zap.NewJSONEncoder(zap.RFC3339Formatter("time"))).With(zap.String("package", "gomock"))
+
+	defaultPool = MockRulePool{pool: map[string]*MockRule{}}
+	defaultRule = MockRule{
+		Path:   "/",
+		Method: "GET",
+		Mode:   ModeNormal,
+		Templates: []*Template{
+			&Template{
+				Content:     "Welcome to gomock",
+				StatusCode:  200,
+				ContentType: "text/html",
+			},
+		},
+	}
 }
 
 func logError(e error) {

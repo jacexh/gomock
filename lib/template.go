@@ -18,8 +18,8 @@ const (
 )
 
 type (
-	// TemplateBase return fixed response
-	TemplateBase struct {
+	// Template return fixed response
+	Template struct {
 		Content     string            `json:"content"`
 		ContentType string            `json:"content_type,omitempty"`
 		StatusCode  int               `json:"status_code,omitempty"`
@@ -27,33 +27,15 @@ type (
 		Keyword     string            `json:"keyword"`
 		Regular     string            `json:"regular"`
 	}
-
-	//TemplateKeyword return by keyword
-	TemplateKeyword struct {
-		*TemplateBase
-		Keyword string `json:"keyword"`
-	}
-
-	// TemplateRegular return by regular
-	TemplateRegular struct {
-		*TemplateBase
-		Regular string `json:"regular"`
-	}
-
-	// Render .
-	Render interface {
-		IsMatched(*http.Request) bool
-		ToResponse(http.ResponseWriter)
-	}
 )
 
 // IsMatched always return true
-func (t *TemplateBase) IsMatched(r *http.Request) bool {
+func (t *Template) IsMatched(r *http.Request) bool {
 	return true
 }
 
 // ToResponse render the template to http response
-func (t *TemplateBase) ToResponse(w http.ResponseWriter) {
+func (t *Template) ToResponse(w http.ResponseWriter) {
 	if t.StatusCode != 0 {
 		w.WriteHeader(t.StatusCode)
 	}
@@ -66,8 +48,8 @@ func (t *TemplateBase) ToResponse(w http.ResponseWriter) {
 	io.WriteString(w, t.Content)
 }
 
-// IsMatched defect the http.request if contains specific keyword
-func (t *TemplateKeyword) IsMatched(r *http.Request) bool {
+// IsMatchedByKeyword defect the http.request if contains specific keyword
+func (t *Template) IsMatchedByKeyword(r *http.Request) bool {
 	if r.Method == http.MethodGet {
 		return strings.Contains(r.URL.RawQuery, t.Keyword)
 	}
@@ -80,8 +62,8 @@ func (t *TemplateKeyword) IsMatched(r *http.Request) bool {
 	return strings.Contains(string(body), t.Keyword)
 }
 
-// IsMatched defect the http request if match the regular option
-func (t *TemplateRegular) IsMatched(r *http.Request) bool {
+// IsMatchedByRegular defect the http request if match the regular option
+func (t *Template) IsMatchedByRegular(r *http.Request) bool {
 	c := regexp.MustCompile(t.Regular)
 
 	if r.Method == http.MethodGet {
