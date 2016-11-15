@@ -24,8 +24,8 @@ type (
 		ContentType string            `json:"content_type,omitempty"`
 		StatusCode  int               `json:"status_code,omitempty"`
 		Headers     map[string]string `json:"headers,omitempty"`
-		Keyword     string            `json:"keyword"`
-		Regular     string            `json:"regular"`
+		Keyword     string            `json:"keyword,omitempty"`
+		Regular     string            `json:"regular,omitempty"`
 	}
 )
 
